@@ -4,9 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from pymongo import MongoClient
 from datetime import datetime, timedelta
-# Importez vos models internes si vous en avez
-# from .models import InternalJob, Application
-
+from .models import JobDocument
+from .forms import JobCreationForm
+from accounts.models import RecruiterDocument, CompanyDocument
 
 def all_jobs(request):
     """
@@ -60,40 +60,38 @@ def all_jobs(request):
         jobs.append(parsed_job)
     
     # --- OFFRES INTERNES (votre plateforme) ---
-    # Décommentez et adaptez si vous avez un model InternalJob
-    """
-    internal_jobs = InternalJob.objects.filter(status='published').select_related('company')
+     # --- OFFRES INTERNES (votre plateforme) ---
+    internal_jobs = JobDocument.objects.filter(status='PUBLISHED')
     
     for job in internal_jobs:
         # Calculer le score de matching si candidat connecté
         match_score = None
         if request.user.is_authenticated and request.user.role == 'candidate':
-            match_score = calculate_match_score(request.user.candidate, job)
-        
-        # Compter les candidatures
-        applicants_count = job.applications.count()
+            try:
+                candidate = CandidateDocument.objects.get(id=request.user.mongo_id)
+                match_score = calculate_match_score(candidate, job)
+            except CandidateDocument.DoesNotExist:
+                pass
         
         parsed_job = {
-            "id": job.id,
-            "source": "platform",
+            "id": str(job.id),
+            "source": "Plateforme RH",  # Pour distinguer
             "title": job.title,
-            "company": job.company.name,
+            "company": job.company_name,
             "location": job.location,
             "description": job.description,
-            "url_final": f"/jobs/{job.id}/",  # URL interne
-            "logo": job.company.logo.url if job.company.logo else None,
-            "contract_type": job.get_contract_type_display(),
-            "salary": job.salary_range if job.salary_range else None,
+            "url_final": f"/jobs/{job.id}/",  # URL interne (à créer plus tard)
+            "logo": None,  # À améliorer avec le logo de l'entreprise
+            "contract_type": dict(job._fields['contract_type'].choices).get(job.contract_type),
+            "salary": job.get_salary_range() if job.salary_min else None,
             "industry": job.industry,
             "parsed_date": job.published_at,
             "is_internal": True,
-            "is_new": is_new_job(job.published_at),
+            "is_new": job.is_new(),
             "match_score": match_score,
-            "applicants_count": applicants_count,
+            "applicants_count": job.applications_count,
         }
         jobs.append(parsed_job)
-    """
-    
     # Tri par date décroissante
     jobs = sorted(jobs, key=lambda x: x["parsed_date"], reverse=True)
     
@@ -380,34 +378,69 @@ def get_similar_jobs(job, limit=5):
 
 @login_required
 def create_job(request):
-    """
-    Publier une nouvelle offre (recruteurs uniquement)
-    """
+    """Publier une nouvelle offre (recruteurs uniquement)"""
+    
+    # Vérifier que l'utilisateur est un recruteur
     if request.user.role != 'recruiter':
         messages.error(request, "Seuls les recruteurs peuvent publier des offres.")
         return redirect('all_jobs')
     
-    # TODO: Implémenter le formulaire de création d'offre
-    """
+    # Récupérer le document recruteur
+    try:
+        recruiter = RecruiterDocument.objects.get(id=request.user.mongo_id)
+        company = CompanyDocument.objects.get(id=recruiter.company_id)
+    except (RecruiterDocument.DoesNotExist, CompanyDocument.DoesNotExist):
+        messages.error(request, "Profil recruteur invalide.")
+        return redirect('recruiter_dashboard')
+    
     if request.method == 'POST':
         form = JobCreationForm(request.POST)
         if form.is_valid():
-            job = form.save(commit=False)
-            job.company = request.user.recruiter.company
-            job.recruiter = request.user.recruiter
-            job.status = 'published'
-            job.published_at = datetime.now()
+            data = form.cleaned_data
+            
+            # Calculer la date d'expiration
+            expires_at = None
+            if data.get('expires_in_days'):
+                expires_at = datetime.now() + timedelta(days=data['expires_in_days'])
+            
+            # Créer l'offre
+            job = JobDocument(
+                company_id=company.id,
+                company_name=company.name,
+                recruiter_id=recruiter.id,
+                title=data['title'],
+                description=data['description'],
+                location=data['location'],
+                contract_type=data['contract_type'],
+                work_mode=data['work_mode'],
+                salary_min=data.get('salary_min'),
+                salary_max=data.get('salary_max'),
+                salary_period=data['salary_period'],
+                required_skills=data.get('required_skills', []),
+                experience_min=data['experience_min'],
+                experience_max=data.get('experience_max'),
+                education_level=data.get('education_level'),
+                industry=data.get('industry'),
+                status='PUBLISHED',
+                published_at=datetime.now(),
+                expires_at=expires_at,
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            )
             job.save()
             
-            messages.success(request, "Offre publiée avec succès !")
+            messages.success(request, f"✅ Offre '{job.title}' publiée avec succès !")
             return redirect('recruiter_dashboard')
     else:
         form = JobCreationForm()
     
-    return render(request, 'jobs/create_job.html', {'form': form})
-    """
-    pass
-
+    context = {
+        'form': form,
+        'recruiter': recruiter,
+        'company': company
+    }
+    
+    return render(request, 'jobs/create_job.html', context)
 
 @login_required
 def manage_applications(request, job_id):

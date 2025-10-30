@@ -68,36 +68,44 @@ class RecruiterRegisterForm(UserCreationForm):
                 raise ValidationError("Le format du site web est invalide. Exemple : example.com")
         return website
 
+    # Dans accounts/forms.py, méthode save()
     def save(self, commit=True):
-        user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
-        user.role = 'recruiter'
-        if commit:
-            user.save()
-            company = CompanyDocument.objects(name=self.cleaned_data['company_name']).first()
-            if not company:
-                company = CompanyDocument(
-                    name=self.cleaned_data['company_name'],
-                    website=self.cleaned_data.get('company_website', ''),
-                    location=self.cleaned_data.get('company_location', ''),
-                    created_at=datetime.now()
-                )
-                company.save()
-            recruiter_doc = RecruiterDocument(
-                user_id=user.id,
-                username=user.username,
-                email=user.email,
-                company_id=company.id,
-                company_name=company.name,
-                first_name=self.cleaned_data['first_name'],
-                last_name=self.cleaned_data['last_name'],
-                phone=self.cleaned_data.get('phone', ''),
-                position=self.cleaned_data.get('position', ''),
-                created_at=datetime.now()
-            )
-            recruiter_doc.save()
-            user.mongo_id = str(recruiter_doc.id)
-            user.save()
+      user = super().save(commit=False)
+      user.email = self.cleaned_data['email']
+      user.role = 'recruiter'
+      if commit:
+        user.save()
+        
+        # ✅ CRÉER OU RÉCUPÉRER L'ENTREPRISE
+        company_name = self.cleaned_data['company_name']
+        company = CompanyDocument.objects(name=company_name).first()
+        
+        if not company:
+          company = CompanyDocument(
+                                    name=company_name,
+                                    website=self.cleaned_data.get('company_website', ''),
+                                    location=self.cleaned_data.get('company_location', ''),
+                                    created_at=datetime.now()
+                                    )
+          company.save()
+          
+          # ✅ CRÉER LE RECRUTEUR AVEC company_id
+          recruiter_doc = RecruiterDocument(
+                                            user_id=user.id,
+                                            username=user.username,
+                                            email=user.email,
+                                            company_id=company.id,  # ✅ CORRECT
+                                            company_name=company.name,
+                                            first_name=self.cleaned_data['first_name'],
+                                            last_name=self.cleaned_data['last_name'],
+                                            phone=self.cleaned_data.get('phone', ''),
+                                            position=self.cleaned_data.get('position', ''),
+                                            created_at=datetime.now()
+                                            )
+          recruiter_doc.save()
+          
+          user.mongo_id = str(recruiter_doc.id)
+          user.save()
         return user
 
 

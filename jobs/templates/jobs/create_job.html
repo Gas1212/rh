@@ -1,0 +1,161 @@
+{% extends "accounts/account.html" %}
+
+{% block title %}Publier une offre{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        
+        <!-- En-tête -->
+        <div class="mb-8">
+            <a href="{% url 'recruiter_dashboard' %}" class="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Retour au dashboard
+            </a>
+            <h1 class="text-3xl font-bold text-gray-900">📝 Publier une nouvelle offre</h1>
+            <p class="text-gray-600 mt-2">{{ company.name }}</p>
+        </div>
+
+        <!-- Formulaire -->
+        <form method="post" class="bg-white rounded-2xl shadow-lg p-8 space-y-8">
+            {% csrf_token %}
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="space-y-3">
+                {% for message in messages %}
+                <div class="bg-{{ message.tags }}-50 border-l-4 border-{{ message.tags }}-500 p-4 rounded">
+                    <p class="text-{{ message.tags }}-800">{{ message }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Section 1: Informations de base -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                    <span class="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold">1</span>
+                    Informations de base
+                </h2>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.title.label }}</label>
+                    {{ form.title }}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.description.label }}</label>
+                    {{ form.description }}
+                </div>
+            </div>
+
+            <!-- Section 2: Localisation & Contrat -->
+            <div class="space-y-6 pt-6 border-t">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                    <span class="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold">2</span>
+                    Localisation & Type de contrat
+                </h2>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.location.label }}</label>
+                        {{ form.location }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.contract_type.label }}</label>
+                        {{ form.contract_type }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.work_mode.label }}</label>
+                        {{ form.work_mode }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Rémunération -->
+            <div class="space-y-6 pt-6 border-t">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                    <span class="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold">3</span>
+                    Rémunération
+                </h2>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.salary_min.label }}</label>
+                        {{ form.salary_min }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.salary_max.label }}</label>
+                        {{ form.salary_max }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.salary_period.label }}</label>
+                        {{ form.salary_period }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Profil recherché -->
+            <div class="space-y-6 pt-6 border-t">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                    <span class="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold">4</span>
+                    Profil recherché
+                </h2>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.required_skills.label }}</label>
+                    {{ form.required_skills }}
+                    <p class="text-xs text-gray-500 mt-1">{{ form.required_skills.help_text }}</p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.experience_min.label }}</label>
+                        {{ form.experience_min }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.experience_max.label }}</label>
+                        {{ form.experience_max }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.education_level.label }}</label>
+                        {{ form.education_level }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5: Autres informations -->
+            <div class="space-y-6 pt-6 border-t">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                    <span class="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold">5</span>
+                    Autres informations
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.industry.label }}</label>
+                        {{ form.industry }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.expires_in_days.label }}</label>
+                        {{ form.expires_in_days }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t">
+                <a href="{% url 'recruiter_dashboard' %}" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                    Annuler
+                </a>
+                <button type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium shadow-lg transform hover:scale-105">
+                    ✅ Publier l'offre
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

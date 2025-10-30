@@ -51,44 +51,15 @@ def register_candidate(request):
         form = CandidateRegisterForm()
     
     return render(request, 'accounts/register_candidate.html', {'form': form})
-import re
-from django.core.exceptions import ValidationError
 
 def register_recruiter(request):
-    """Inscription Recruteur"""
     if request.method == 'POST':
         form = RecruiterRegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-
-            # Récupérer le site web du formulaire
-            website = form.cleaned_data.get('website', '').strip()
-
-            # Validation simple : seulement exemple.com, pas http:// ni https://
-            if website and not re.match(r'^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', website):
-                messages.error(request, "Le format du site web est invalide. Exemple : example.com")
-                return render(request, 'accounts/register_recruiter.html', {'form': form})
-
-            try:
-                recruiter_doc = RecruiterDocument.objects.get(user_id=user.id)
-            except RecruiterDocument.DoesNotExist:
-                recruiter_doc = RecruiterDocument(
-                    user_id=user.id,
-                    username=user.username,
-                    first_name=user.first_name,
-                    last_name=user.last_name,
-                    email=user.email,
-                    company_name=form.cleaned_data.get('company_name', ''),
-                    website=website  # Stocke seulement example.com
-                )
-                recruiter_doc.save()
-
-            user.mongo_id = str(recruiter_doc.id)
-            user.role = "recruiter"
-            user.save()
-
+            user = form.save()  # ✅ Le form.save() s'occupe de tout
+            
             login(request, user)
-            messages.success(request, 'Inscription réussie ! Vous pouvez maintenant gérer vos offres.')
+            messages.success(request, 'Inscription réussie !')
             return redirect('dashboard_redirect')
     else:
         form = RecruiterRegisterForm()
