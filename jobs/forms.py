@@ -150,3 +150,16 @@ class JobCreationForm(forms.Form):
         if skills:
             return [s.strip() for s in skills.split(',') if s.strip()]
         return []
+
+class ApplicationForm(forms.Form):
+    """Formulaire de candidature"""
+    
+    cover_letter = forms.CharField(
+        label="Lettre de motivation",
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500',
+            'rows': 8,
+            'placeholder': 'Expliquez pourquoi vous êtes le candidat idéal pour ce poste...'
+        })
+    )

@@ -6,7 +6,8 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta
 from .models import JobDocument
 from .forms import JobCreationForm
-from accounts.models import RecruiterDocument, CompanyDocument
+from .models import JobDocument, ApplicationDocument 
+from accounts.models import RecruiterDocument, CompanyDocument, CandidateDocument
 
 def all_jobs(request):
     """
@@ -129,92 +130,134 @@ def all_jobs(request):
     return render(request, "jobs/all_jobs.html", context)
 
 
+# ==================== VUES POUR CANDIDATS ====================
+
 @login_required
 def job_detail(request, job_id):
     """
-    Vue détaillée d'une offre interne (uniquement pour les offres de votre plateforme)
+    Vue détaillée d'une offre interne
     """
-    # Décommentez si vous avez un model InternalJob
-    """
-    job = get_object_or_404(InternalJob, id=job_id, status='published')
+    try:
+        job = JobDocument.objects.get(id=job_id, status='PUBLISHED')
+    except JobDocument.DoesNotExist:
+        messages.error(request, "Cette offre n'existe pas ou n'est plus disponible.")
+        return redirect('all_jobs')
     
     # Incrémenter le compteur de vues
-    job.views_count += 1
-    job.save()
+    job.increment_views()
     
     # Calculer le score de matching si candidat
     match_score = None
     has_applied = False
     
     if request.user.is_authenticated and request.user.role == 'candidate':
-        match_score = calculate_match_score(request.user.candidate, job)
-        has_applied = Application.objects.filter(
-            job=job, 
-            candidate=request.user.candidate
-        ).exists()
+        try:
+            candidate = CandidateDocument.objects.get(id=request.user.mongo_id)
+            match_score = calculate_match_score(candidate, job)
+            
+            # Vérifier si déjà candidaté
+            from .models import ApplicationDocument
+            has_applied = ApplicationDocument.objects.filter(
+                job_id=job.id,
+                candidate_id=candidate.id
+            ).count() > 0
+            
+        except CandidateDocument.DoesNotExist:
+            pass
     
     context = {
         'job': job,
         'match_score': match_score,
         'has_applied': has_applied,
-        'similar_jobs': get_similar_jobs(job, limit=3),
     }
     
     return render(request, 'jobs/job_detail.html', context)
-    """
-    pass
-
-
 @login_required
 def apply_to_job(request, job_id):
     """
     Postuler à une offre interne
     """
+    from .forms import ApplicationForm
+    
     # Vérifier que l'utilisateur est un candidat
     if request.user.role != 'candidate':
         messages.error(request, "Seuls les candidats peuvent postuler.")
         return redirect('all_jobs')
     
-    # Décommentez si vous avez les models
-    """
-    job = get_object_or_404(InternalJob, id=job_id, status='published')
-    candidate = request.user.candidate
+    # Récupérer l'offre
+    try:
+        job = JobDocument.objects.get(id=job_id, status='PUBLISHED')
+    except JobDocument.DoesNotExist:
+        messages.error(request, "Cette offre n'existe pas ou n'est plus disponible.")
+        return redirect('all_jobs')
+    
+    # Récupérer le candidat
+    try:
+        candidate = CandidateDocument.objects.get(id=request.user.mongo_id)
+    except CandidateDocument.DoesNotExist:
+        messages.error(request, "Profil candidat invalide.")
+        return redirect('all_jobs')
     
     # Vérifier si déjà candidaté
-    if Application.objects.filter(job=job, candidate=candidate).exists():
+    existing_application = ApplicationDocument.objects.filter(
+        job_id=job.id,
+        candidate_id=candidate.id
+    ).first()
+    
+    if existing_application:
         messages.warning(request, "Vous avez déjà postulé à cette offre.")
         return redirect('job_detail', job_id=job_id)
     
     if request.method == 'POST':
-        cover_letter = request.POST.get('cover_letter', '')
+        form = ApplicationForm(request.POST)  # ✅ RETIRER request.FILES
         
-        # Calculer le score de matching avec l'IA
-        match_score = calculate_match_score(candidate, job)
-        
-        # Créer la candidature
-        application = Application.objects.create(
-            job=job,
-            candidate=candidate,
-            cover_letter=cover_letter,
-            ai_match_score=match_score,
-            status='submitted'
-        )
-        
-        # Analyse IA de la candidature
-        ai_analysis = analyze_application_with_ai(candidate, job)
-        application.ai_analysis = ai_analysis
-        application.save()
-        
-        messages.success(request, f"Candidature envoyée avec succès ! Score de matching : {match_score}%")
-        return redirect('candidate_dashboard')
+        if form.is_valid():
+            # Calculer le score de matching
+            match_score = calculate_match_score(candidate, job)
+            
+            # Analyse IA de la candidature
+            ai_analysis = analyze_application_with_ai(candidate, job)
+            
+            # Créer la candidature
+            application = ApplicationDocument(
+                job_id=job.id,
+                job_title=job.title,
+                company_name=job.company_name,
+                candidate_id=candidate.id,
+                candidate_name=f"{candidate.first_name} {candidate.last_name}",
+                candidate_email=candidate.email,
+                cover_letter=form.cleaned_data.get('cover_letter', ''),
+                cv_url=candidate.cv_url,  # ✅ Utilise le CV du profil
+                ai_match_score=match_score,
+                ai_analysis=ai_analysis,
+                status='SUBMITTED',
+                applied_at=datetime.now(),
+                updated_at=datetime.now()
+            )
+            application.save()
+            
+            # Incrémenter le compteur de candidatures
+            job.increment_applications()
+            
+            messages.success(
+                request, 
+                f"🎉 Candidature envoyée avec succès ! Score de matching : {match_score}%"
+            )
+            return redirect('candidate_dashboard')
+    else:
+        form = ApplicationForm()
     
-    return render(request, 'jobs/apply.html', {
+    # Calculer le score de matching pour affichage
+    match_score = calculate_match_score(candidate, job)
+    
+    context = {
+        'form': form,
         'job': job,
-        'candidate': candidate
-    })
-    """
-    pass
-
+        'candidate': candidate,
+        'match_score': match_score,
+    }
+    
+    return render(request, 'jobs/apply.html', context)
 
 @login_required
 def save_job(request, job_id):
@@ -311,7 +354,7 @@ def calculate_match_score(candidate, job):
     score = int((len(matching_skills) / len(job_skills)) * 100)
     
     # Bonus pour l'expérience
-    if candidate.experience_years >= job.experience_required:
+    if candidate.experience_years >= job.experience_min:
         score = min(100, score + 10)
     
     # Bonus pour la localisation

@@ -1,0 +1,165 @@
+{% extends "accounts/account.html" %}
+
+{% block title %}Postuler - {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        
+        <!-- Breadcrumb -->
+        <div class="mb-6">
+            <a href="{% url 'job_detail' job.id %}" class="inline-flex items-center text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Retour à l'offre
+            </a>
+        </div>
+
+        <!-- En-tête -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Postuler à cette offre</h1>
+                    <h2 class="text-xl text-gray-600">{{ job.title }} - {{ job.company_name }}</h2>
+                </div>
+                
+                <!-- Badge Match Score -->
+                {% if match_score %}
+                <div class="text-center">
+                    <div class="inline-flex items-center px-4 py-2 rounded-full
+                        {% if match_score >= 80 %}
+                            bg-green-100 text-green-700
+                        {% elif match_score >= 60 %}
+                            bg-blue-100 text-blue-700
+                        {% else %}
+                            bg-yellow-100 text-yellow-700
+                        {% endif %}">
+                        <span class="text-2xl font-bold">{{ match_score }}%</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Score de matching</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Formulaire -->
+        <form method="post" class="bg-white rounded-2xl shadow-lg p-8">
+            {% csrf_token %}
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                <div class="bg-{{ message.tags }}-50 border-l-4 border-{{ message.tags }}-500 p-4 rounded mb-3">
+                    <p class="text-{{ message.tags }}-800">{{ message }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Informations candidat -->
+            <div class="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
+                <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                    </svg>
+                    Vos informations
+                </h3>
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm text-gray-600">Nom complet</dt>
+                        <dd class="font-semibold text-gray-900">{{ candidate.first_name }} {{ candidate.last_name }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-600">Email</dt>
+                        <dd class="font-semibold text-gray-900">{{ candidate.email }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-600">Téléphone</dt>
+                        <dd class="font-semibold text-gray-900">{{ candidate.phone|default:"Non renseigné" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-600">Expérience</dt>
+                        <dd class="font-semibold text-gray-900">{{ candidate.experience_years }} ans</dd>
+                    </div>
+                </dl>
+                
+                <!-- ✅ Info sur le profil -->
+                <div class="mt-4 bg-white rounded-lg p-4 border border-blue-200">
+                    <p class="text-sm text-blue-800">
+                        <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <strong>Le recruteur aura accès à votre profil complet</strong> avec votre CV, vos compétences et votre parcours.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Lettre de motivation -->
+            <div class="mb-8">
+                <label class="block text-sm font-bold text-gray-900 mb-2">
+                    {{ form.cover_letter.label }}
+                    <span class="text-gray-500 font-normal">(optionnel mais recommandé)</span>
+                </label>
+                {{ form.cover_letter }}
+                <p class="text-xs text-gray-500 mt-2">
+                    💡 <strong>Conseil :</strong> Personnalisez votre message pour maximiser vos chances. Expliquez pourquoi vous êtes intéressé par ce poste et cette entreprise.
+                </p>
+            </div>
+
+            <!-- Aperçu matching -->
+            <div class="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 class="font-bold text-blue-900 mb-3 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                    </svg>
+                    Analyse de compatibilité
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-blue-700 font-semibold mb-2">✅ Points forts</p>
+                        <ul class="text-sm text-blue-800 space-y-1">
+                            {% if candidate.experience_years >= job.experience_min %}
+                            <li>• Expérience suffisante ({{ candidate.experience_years }} ans)</li>
+                            {% endif %}
+                            {% if candidate.location and job.location and candidate.location|lower in job.location|lower %}
+                            <li>• Localisation correspondante</li>
+                            {% endif %}
+                            <li>• Profil complet et vérifié</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="text-sm text-blue-700 font-semibold mb-2">💡 Recommandations</p>
+                        <ul class="text-sm text-blue-800 space-y-1">
+                            <li>• Mettez à jour votre profil si nécessaire</li>
+                            <li>• Personnalisez votre lettre de motivation</li>
+                            <li>• Mettez en avant vos réussites</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boutons -->
+            <div class="flex items-center justify-between">
+                <a href="{% url 'candidate_profile' %}" class="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                    Consulter mon profil →
+                </a>
+                <div class="flex gap-4">
+                    <a href="{% url 'job_detail' job.id %}" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                        Annuler
+                    </a>
+                    <button type="submit" class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-bold shadow-lg transform hover:scale-105 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Envoyer ma candidature
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

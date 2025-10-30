@@ -150,3 +150,104 @@ class JobDocument(Document):
         """Incrémenter le compteur de candidatures"""
         self.applications_count += 1
         self.save()
+      
+
+class ApplicationDocument(Document):
+    """
+    Candidature à une offre (MongoDB)
+    """
+    
+    # ==================== RELATIONS ====================
+    job_id = fields.ObjectIdField(required=True)  # Référence JobDocument
+    job_title = fields.StringField(max_length=255)  # Dénormalisé
+    company_name = fields.StringField(max_length=255)  # Dénormalisé
+    
+    candidate_id = fields.ObjectIdField(required=True)  # Référence CandidateDocument
+    candidate_name = fields.StringField(max_length=255)  # Dénormalisé
+    candidate_email = fields.EmailField()  # Dénormalisé
+    
+    # ==================== CONTENU CANDIDATURE ====================
+    cover_letter = fields.StringField()  # Lettre de motivation
+    cv_url = fields.URLField()  # Lien vers le CV uploadé
+    
+    # ==================== MATCHING IA ====================
+    ai_match_score = fields.IntField(min_value=0, max_value=100)  # Score calculé automatiquement
+    ai_analysis = fields.DictField()  # Analyse détaillée
+    # Structure : {
+    #   'strengths': ['...'],
+    #   'weaknesses': ['...'],
+    #   'recommendations': '...'
+    # }
+    
+    # ==================== STATUT ====================
+    status = fields.StringField(
+        max_length=20,
+        choices=[
+            ('SUBMITTED', 'Envoyée'),
+            ('VIEWED', 'Vue par recruteur'),
+            ('SHORTLISTED', 'Présélectionnée'),
+            ('INTERVIEW', 'Entretien programmé'),
+            ('ACCEPTED', 'Acceptée'),
+            ('REJECTED', 'Refusée'),
+        ],
+        default='SUBMITTED'
+    )
+    
+    # ==================== NOTES RECRUTEUR ====================
+    recruiter_notes = fields.StringField()  # Notes privées du recruteur
+    recruiter_rating = fields.IntField(min_value=1, max_value=5)  # Note sur 5
+    
+    # ==================== METADATA ====================
+    applied_at = fields.DateTimeField(default=datetime.now)
+    viewed_at = fields.DateTimeField()  # Date de première vue par recruteur
+    updated_at = fields.DateTimeField(default=datetime.now)
+    
+    # ==================== CONFIGURATION MONGODB ====================
+    meta = {
+        'collection': 'applications',
+        'db_alias': 'default',
+        'indexes': [
+            'job_id',
+            'candidate_id',
+            'status',
+            'ai_match_score',
+            'applied_at',
+            ('job_id', 'candidate_id'),  # Index composé pour éviter doublons
+        ],
+        'ordering': ['-ai_match_score', '-applied_at']  # Meilleurs scores d'abord
+    }
+    
+    def __str__(self):
+        return f"{self.candidate_name} → {self.job_title}"
+    
+    # ==================== MÉTHODES UTILITAIRES ====================
+    
+    def mark_as_viewed(self):
+        """Marquer comme vue par le recruteur"""
+        if not self.viewed_at:
+            self.viewed_at = datetime.now()
+            self.status = 'VIEWED'
+            self.save()
+    
+    def get_status_badge_color(self):
+        """Retourne la couleur du badge selon le statut"""
+        colors = {
+            'SUBMITTED': 'blue',
+            'VIEWED': 'yellow',
+            'SHORTLISTED': 'purple',
+            'INTERVIEW': 'indigo',
+            'ACCEPTED': 'green',
+            'REJECTED': 'red',
+        }
+        return colors.get(self.status, 'gray')
+    
+    def get_match_badge_color(self):
+        """Retourne la couleur selon le score de matching"""
+        if self.ai_match_score >= 80:
+            return 'green'
+        elif self.ai_match_score >= 60:
+            return 'blue'
+        elif self.ai_match_score >= 40:
+            return 'yellow'
+        else:
+            return 'red'
