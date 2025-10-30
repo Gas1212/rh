@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Résultat fiche de paie</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <div class="card shadow-lg p-5 rounded-4">
+        <h2 class="text-center mb-4 text-success fw-bold">🧾 Fiche de paie - {{ mois }}</h2>
+
+        <div class="row mb-3">
+            <div class="col-md-6"><strong>Employé :</strong> {{ prenom }} {{ nom }}</div>
+            <div class="col-md-3"><strong>Chef de famille :</strong> {{ chef_famille|yesno:"Oui,Non" }}</div>
+            <div class="col-md-3"><strong>Enfants à charge :</strong> {{ enfants }}</div>
+        </div>
+
+        <hr>
+
+        <table class="table table-bordered table-striped">
+            <tbody>
+                <tr>
+                    <th>Salaire brut</th>
+                    <td>{{ salaire_brut }} TND</td>
+                </tr>
+                <tr>
+                    <th>Retenue CNSS</th>
+                    <td>{{ cotisation_sociale }} TND</td>
+                </tr>
+                <tr>
+                    <th>Salaire imposable</th>
+                    <td>{{ salaire_apres_cnss  }} TND</td>
+                </tr>
+                <tr>
+                    <th>IRPP</th>
+                    <td>{{ irpp }} TND</td>
+                </tr>
+                <tr>
+                    <th>Contribution sociale solidaire</th>
+                    <td>{{ css }} TND</td>
+                </tr>
+                <tr>
+                    <th>Retenue totale</th>
+                    <td>{{ retenue_totale }} TND</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="text-center mt-4">
+            <h4 class="text-success fw-bold">💰 Salaire net : {{ salaire_net }} TND</h4>
+            <a href="/simulateur/" class="btn btn-primary mt-3">🡐 Nouvelle simulation</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

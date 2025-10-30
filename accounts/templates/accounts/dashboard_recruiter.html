@@ -1,0 +1,509 @@
+{% extends "accounts/account.html" %}
+
+{% block title %}Dashboard Recruteur{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- En-tête avec salutation -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">
+                        Bonjour, {{ recruiter.first_name }} 👋
+                    </h1>
+                    <p class="mt-1 text-sm text-gray-600">
+                        {{ recruiter.company.name }} • {% now "l d F Y" %}
+                    </p>
+                </div>
+                <div class="mt-4 sm:mt-0 flex space-x-3">
+                    <a href="#" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg transform hover:scale-105">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Publier une offre
+                    </a>
+                    <a href="{% url 'recruiter_profile' %}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Paramètres
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cartes statistiques -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Offres actives -->
+            <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">8</span>
+                </div>
+                <h3 class="text-sm font-medium text-gray-600">Offres actives</h3>
+                <p class="mt-1 text-xs text-green-600 font-medium">+2 ce mois-ci</p>
+            </div>
+
+            <!-- Candidatures reçues -->
+            <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">156</span>
+                </div>
+                <h3 class="text-sm font-medium text-gray-600">Candidatures reçues</h3>
+                <p class="mt-1 text-xs text-blue-600 font-medium">+42 cette semaine</p>
+            </div>
+
+            <!-- Candidats présélectionnés -->
+            <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">24</span>
+                </div>
+                <h3 class="text-sm font-medium text-gray-600">Présélectionnés</h3>
+                <p class="mt-1 text-xs text-purple-600 font-medium">À contacter</p>
+            </div>
+
+            <!-- Taux de réponse -->
+            <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">68%</span>
+                </div>
+                <h3 class="text-sm font-medium text-gray-600">Taux de réponse</h3>
+                <p class="mt-1 text-xs text-orange-600 font-medium">+5% vs dernier mois</p>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            
+            <!-- Colonne principale -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Meilleurs candidats IA -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mr-3">
+                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">Top Candidats - IA</h2>
+                                    <p class="text-xs text-gray-600">Meilleur matching pour vos offres</p>
+                                </div>
+                            </div>
+                            <a href="#" class="text-sm text-green-600 hover:text-green-700 font-medium">Voir tout →</a>
+                        </div>
+                    </div>
+
+                    <div class="divide-y divide-gray-100">
+                        <!-- Candidat 1 -->
+                        <div class="p-6 hover:bg-gray-50 transition cursor-pointer group">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-start space-x-4 flex-1">
+                                    <div class="h-16 w-16 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                        <span class="text-2xl font-bold text-blue-600">MA</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center">
+                                            <h3 class="font-bold text-gray-900 group-hover:text-green-600 transition">
+                                                Mohamed Ali
+                                            </h3>
+                                            <svg class="h-5 w-5 ml-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mt-1">Développeur Full Stack • 5 ans d'expérience</p>
+                                        <div class="flex flex-wrap gap-2 mt-3">
+                                            <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">React</span>
+                                            <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">Node.js</span>
+                                            <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">MongoDB</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 mt-3">
+                                            <button class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition font-medium">
+                                                Contacter
+                                            </button>
+                                            <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition font-medium">
+                                                Voir profil
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end ml-4">
+                                    <span class="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-sm font-bold shadow-lg">
+                                        🎯 96% Match
+                                    </span>
+                                    <span class="text-xs text-gray-500 mt-2">Candidat il y a 1h</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Candidat 2 -->
+                        <div class="p-6 hover:bg-gray-50 transition cursor-pointer group">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-start space-x-4 flex-1">
+                                    <div class="h-16 w-16 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-2xl font-bold text-purple-600">SB</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-gray-900 group-hover:text-green-600 transition">
+                                            Sara Ben Ahmed
+                                        </h3>
+                                        <p class="text-sm text-gray-600 mt-1">UX/UI Designer • 3 ans d'expérience</p>
+                                        <div class="flex flex-wrap gap-2 mt-3">
+                                            <span class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Figma</span>
+                                            <span class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Adobe XD</span>
+                                            <span class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Sketch</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 mt-3">
+                                            <button class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition font-medium">
+                                                Contacter
+                                            </button>
+                                            <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition font-medium">
+                                                Voir profil
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end ml-4">
+                                    <span class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-bold shadow-lg">
+                                        🎯 92% Match
+                                    </span>
+                                    <span class="text-xs text-gray-500 mt-2">Candidat il y a 3h</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Candidat 3 -->
+                        <div class="p-6 hover:bg-gray-50 transition cursor-pointer group">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-start space-x-4 flex-1">
+                                    <div class="h-16 w-16 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-2xl font-bold text-green-600">AK</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-gray-900 group-hover:text-green-600 transition">
+                                            Ahmed Karim
+                                        </h3>
+                                        <p class="text-sm text-gray-600 mt-1">Data Scientist • 4 ans d'expérience</p>
+                                        <div class="flex flex-wrap gap-2 mt-3">
+                                            <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">Python</span>
+                                            <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">ML</span>
+                                            <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">TensorFlow</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 mt-3">
+                                            <button class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition font-medium">
+                                                Contacter
+                                            </button>
+                                            <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition font-medium">
+                                                Voir profil
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end ml-4">
+                                    <span class="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg text-sm font-bold shadow-lg">
+                                        🎯 89% Match
+                                    </span>
+                                    <span class="text-xs text-gray-500 mt-2">Candidat il y a 1j</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mes offres actives -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">Mes offres actives</h2>
+                                    <p class="text-xs text-gray-600">Gérez vos publications</p>
+                                </div>
+                            </div>
+                            <a href="#" class="text-sm text-green-600 hover:text-green-700 font-medium">Voir tout →</a>
+                        </div>
+                    </div>
+
+                    <div class="divide-y divide-gray-100">
+                        <!-- Offre 1 -->
+                        <div class="p-6 hover:bg-gray-50 transition">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h3 class="font-bold text-gray-900">Développeur Full Stack Senior</h3>
+                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                                            Active
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                                        <span class="flex items-center">
+                                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            </svg>
+                                            Tunis
+                                        </span>
+                                        <span class="flex items-center">
+                                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            CDI
+                                        </span>
+                                        <span class="flex items-center">
+                                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            Publié il y a 3 jours
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-6 bg-gray-50 rounded-lg p-3">
+                                        <div class="text-center">
+                                            <p class="text-2xl font-bold text-blue-600">42</p>
+                                            <p class="text-xs text-gray-600">Candidatures</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-2xl font-bold text-green-600">12</p>
+                                            <p class="text-xs text-gray-600">Présélectionnés</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-2xl font-bold text-purple-600">856</p>
+                                            <p class="text-xs text-gray-600">Vues</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 mt-4">
+                                        <button class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition font-medium">
+                                            Voir candidatures
+                                        </button>
+                                        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition font-medium">
+                                            Modifier
+                                        </button>
+                                        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition font-medium">
+                                            Statistiques
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Offre 2 -->
+                        <div class="p-6 hover:bg-gray-50 transition">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h3 class="font-bold text-gray-900">Designer UI/UX</h3>
+                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                                            Active
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                                        <span class="flex items-center">
+                                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            Remote
+                                        </span>
+                                        <span class="flex items-center">
+                                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            CDI
+                                        </span>
+                                        <span class="flex items-center">
+                                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            Publié il y a 1 semaine
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-6 bg-gray-50 rounded-lg p-3">
+                                        <div class="text-center">
+                                            <p class="text-2xl font-bold text-blue-600">28</p>
+                                            <p class="text-xs text-gray-600">Candidatures</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-2xl font-bold text-green-600">8</p>
+                                            <p class="text-xs text-gray-600">Présélectionnés</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-2xl font-bold text-purple-600">624</p>
+                                            <p class="text-xs text-gray-600">Vues</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 mt-4">
+                                        <button class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition font-medium">
+                                            Voir candidatures
+                                        </button>
+                                        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition font-medium">
+                                            Modifier
+                                        </button>
+                                        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition font-medium">
+                                            Statistiques
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar droite -->
+            <div class="space-y-6">
+                
+                <!-- Insights IA -->
+                <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
+                    <div class="flex items-center mb-4">
+                        <div class="h-10 w-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-lg">Insights IA 🤖</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-white bg-opacity-10 backdrop-blur rounded-lg p-3">
+                            <p class="text-sm font-medium mb-1">📈 Performances</p>
+                            <p class="text-xs opacity-90">Vos offres ont 35% plus de vues que la moyenne</p>
+                        </div>
+                        <div class="bg-white bg-opacity-10 backdrop-blur rounded-lg p-3">
+                            <p class="text-sm font-medium mb-1">⚡ Action recommandée</p>
+                            <p class="text-xs opacity-90">3 candidats hautement qualifiés à contacter aujourd'hui</p>
+                        </div>
+                        <div class="bg-white bg-opacity-10 backdrop-blur rounded-lg p-3">
+                            <p class="text-sm font-medium mb-1">💡 Conseil</p>
+                            <p class="text-xs opacity-90">Ajoutez des compétences pour améliorer le matching</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activité récente -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+                        <svg class="h-5 w-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Activité récente
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-900">Nouvelle candidature reçue</p>
+                                <p class="text-xs text-gray-500">Il y a 15 min</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="h-4 w-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-900">Profil consulté</p>
+                                <p class="text-xs text-gray-500">Il y a 1h</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="h-4 w-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-900">Matching IA mis à jour</p>
+                                <p class="text-xs text-gray-500">Il y a 3h</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions rapides -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-bold text-gray-900 mb-4">Actions rapides</h3>
+                    <div class="space-y-2">
+                        <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition group">
+                            <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700 group-hover:text-green-600 transition">Publier une offre</span>
+                        </a>
+                        <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition group">
+                            <div class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">Rechercher candidats</span>
+                        </a>
+                        <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition group">
+                            <div class="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                                <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700 group-hover:text-purple-600 transition">Voir statistiques</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .max-w-7xl > * {
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    .grid > div:nth-child(1) { animation-delay: 0.1s; }
+    .grid > div:nth-child(2) { animation-delay: 0.2s; }
+    .grid > div:nth-child(3) { animation-delay: 0.3s; }
+    .grid > div:nth-child(4) { animation-delay: 0.4s; }
+</style>
+{% endblock %}

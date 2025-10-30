@@ -1,0 +1,433 @@
+from django.conf import settings
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from pymongo import MongoClient
+from datetime import datetime, timedelta
+# Importez vos models internes si vous en avez
+# from .models import InternalJob, Application
+
+
+def all_jobs(request):
+    """
+    Vue principale : affiche toutes les offres (externes + internes)
+    """
+    # Connexion MongoDB pour offres externes
+    client = MongoClient(settings.MONGO_URI)
+    db_kee = client[settings.MONGO_DATABASE_1][settings.MONGO_COLLECTION]
+    db_tanit = client[settings.MONGO_DATABASE_2][settings.MONGO_COLLECTION]
+    
+    jobs = []
+    
+    # --- OFFRES KEEJOB (MongoDB) ---
+    for job in db_kee.find().limit(100):  # Limiter pour performances
+        parsed_job = {
+            "id": str(job.get("_id")),
+            "source": "Keejob.com",
+            "title": job.get("job_title") or job.get("title") or "Titre non disponible",
+            "company": job.get("company_name") or job.get("company") or "Entreprise",
+            "location": job.get("location") or "Tunisie",
+            "description": job.get("description") or job.get("job_description") or "",
+            "url_final": job.get("job_url") or job.get("company_url") or "#",
+            "logo": job.get("logo"),
+            "contract_type": job.get("contract_type"),
+            "salary": job.get("salary"),
+            "industry": job.get("industry"),
+            "parsed_date": parse_date(job.get("date_parsed") or job.get("date")),
+            "is_internal": False,
+            "is_new": is_new_job(job.get("date_parsed") or job.get("date")),
+        }
+        jobs.append(parsed_job)
+    
+    # --- OFFRES TANITJOBS (MongoDB) ---
+    for job in db_tanit.find().limit(100):
+        parsed_job = {
+            "id": str(job.get("_id")),
+            "source": "TanitJobs.com",
+            "title": job.get("title") or "Titre non disponible",
+            "company": job.get("company") or "Entreprise",
+            "location": job.get("location") or "Tunisie",
+            "description": job.get("description") or "",
+            "url_final": job.get("url") or job.get("url_final") or "#",
+            "logo": None,
+            "contract_type": job.get("contract_type"),
+            "salary": None,
+            "industry": None,
+            "parsed_date": parse_date(job.get("date") or str(job.get("scraped_at"))),
+            "is_internal": False,
+            "is_new": is_new_job(job.get("date")),
+        }
+        jobs.append(parsed_job)
+    
+    # --- OFFRES INTERNES (votre plateforme) ---
+    # Décommentez et adaptez si vous avez un model InternalJob
+    """
+    internal_jobs = InternalJob.objects.filter(status='published').select_related('company')
+    
+    for job in internal_jobs:
+        # Calculer le score de matching si candidat connecté
+        match_score = None
+        if request.user.is_authenticated and request.user.role == 'candidate':
+            match_score = calculate_match_score(request.user.candidate, job)
+        
+        # Compter les candidatures
+        applicants_count = job.applications.count()
+        
+        parsed_job = {
+            "id": job.id,
+            "source": "platform",
+            "title": job.title,
+            "company": job.company.name,
+            "location": job.location,
+            "description": job.description,
+            "url_final": f"/jobs/{job.id}/",  # URL interne
+            "logo": job.company.logo.url if job.company.logo else None,
+            "contract_type": job.get_contract_type_display(),
+            "salary": job.salary_range if job.salary_range else None,
+            "industry": job.industry,
+            "parsed_date": job.published_at,
+            "is_internal": True,
+            "is_new": is_new_job(job.published_at),
+            "match_score": match_score,
+            "applicants_count": applicants_count,
+        }
+        jobs.append(parsed_job)
+    """
+    
+    # Tri par date décroissante
+    jobs = sorted(jobs, key=lambda x: x["parsed_date"], reverse=True)
+    
+    # Filtres depuis la requête GET
+    location_filter = request.GET.get('location', '').lower()
+    contract_filter = request.GET.get('contract', '').lower()
+    source_filter = request.GET.get('source', '').lower()
+    search_query = request.GET.get('q', '').lower()
+    
+    # Appliquer les filtres
+    if location_filter:
+        jobs = [j for j in jobs if location_filter in j['location'].lower()]
+    
+    if contract_filter:
+        jobs = [j for j in jobs if j['contract_type'] and contract_filter in j['contract_type'].lower()]
+    
+    if source_filter:
+        if source_filter == 'platform':
+            jobs = [j for j in jobs if j['is_internal']]
+        else:
+            jobs = [j for j in jobs if source_filter in j['source'].lower()]
+    
+    if search_query:
+        jobs = [j for j in jobs if (
+            search_query in j['title'].lower() or
+            search_query in j['company'].lower() or
+            search_query in j['description'].lower()
+        )]
+    
+    context = {
+        "jobs": jobs,
+        "total_count": len(jobs),
+    }
+    
+    return render(request, "jobs/all_jobs.html", context)
+
+
+@login_required
+def job_detail(request, job_id):
+    """
+    Vue détaillée d'une offre interne (uniquement pour les offres de votre plateforme)
+    """
+    # Décommentez si vous avez un model InternalJob
+    """
+    job = get_object_or_404(InternalJob, id=job_id, status='published')
+    
+    # Incrémenter le compteur de vues
+    job.views_count += 1
+    job.save()
+    
+    # Calculer le score de matching si candidat
+    match_score = None
+    has_applied = False
+    
+    if request.user.is_authenticated and request.user.role == 'candidate':
+        match_score = calculate_match_score(request.user.candidate, job)
+        has_applied = Application.objects.filter(
+            job=job, 
+            candidate=request.user.candidate
+        ).exists()
+    
+    context = {
+        'job': job,
+        'match_score': match_score,
+        'has_applied': has_applied,
+        'similar_jobs': get_similar_jobs(job, limit=3),
+    }
+    
+    return render(request, 'jobs/job_detail.html', context)
+    """
+    pass
+
+
+@login_required
+def apply_to_job(request, job_id):
+    """
+    Postuler à une offre interne
+    """
+    # Vérifier que l'utilisateur est un candidat
+    if request.user.role != 'candidate':
+        messages.error(request, "Seuls les candidats peuvent postuler.")
+        return redirect('all_jobs')
+    
+    # Décommentez si vous avez les models
+    """
+    job = get_object_or_404(InternalJob, id=job_id, status='published')
+    candidate = request.user.candidate
+    
+    # Vérifier si déjà candidaté
+    if Application.objects.filter(job=job, candidate=candidate).exists():
+        messages.warning(request, "Vous avez déjà postulé à cette offre.")
+        return redirect('job_detail', job_id=job_id)
+    
+    if request.method == 'POST':
+        cover_letter = request.POST.get('cover_letter', '')
+        
+        # Calculer le score de matching avec l'IA
+        match_score = calculate_match_score(candidate, job)
+        
+        # Créer la candidature
+        application = Application.objects.create(
+            job=job,
+            candidate=candidate,
+            cover_letter=cover_letter,
+            ai_match_score=match_score,
+            status='submitted'
+        )
+        
+        # Analyse IA de la candidature
+        ai_analysis = analyze_application_with_ai(candidate, job)
+        application.ai_analysis = ai_analysis
+        application.save()
+        
+        messages.success(request, f"Candidature envoyée avec succès ! Score de matching : {match_score}%")
+        return redirect('candidate_dashboard')
+    
+    return render(request, 'jobs/apply.html', {
+        'job': job,
+        'candidate': candidate
+    })
+    """
+    pass
+
+
+@login_required
+def save_job(request, job_id):
+    """
+    Sauvegarder une offre dans les favoris (AJAX)
+    """
+    if request.method == 'POST' and request.user.role == 'candidate':
+        # Décommentez si vous avez un model SavedJob
+        """
+        job = get_object_or_404(InternalJob, id=job_id)
+        candidate = request.user.candidate
+        
+        saved_job, created = SavedJob.objects.get_or_create(
+            candidate=candidate,
+            job=job
+        )
+        
+        if not created:
+            # Si déjà sauvegardé, on le retire
+            saved_job.delete()
+            return JsonResponse({'saved': False})
+        
+        return JsonResponse({'saved': True})
+        """
+        pass
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+# ==================== FONCTIONS UTILITAIRES ====================
+
+def parse_date(value):
+    """
+    Convertit une date en datetime.
+    Si string : tente différents formats.
+    Si datetime : renvoie tel quel.
+    Sinon renvoie datetime.min
+    """
+    if isinstance(value, datetime):
+        return value
+    
+    if isinstance(value, str):
+        # Liste des formats à tester
+        formats = [
+            "%Y-%m-%d",
+            "%Y/%m/%d",
+            "%d-%m-%Y",
+            "%d/%m/%Y",
+            "%Y-%m-%d %H:%M:%S",
+            "%d/%m/%Y %H:%M:%S",
+        ]
+        
+        for fmt in formats:
+            try:
+                return datetime.strptime(value, fmt)
+            except ValueError:
+                continue
+    
+    # Si aucun format ne marche, retourner date minimale
+    return datetime.min
+
+
+def is_new_job(date_value):
+    """
+    Détermine si une offre est "nouvelle" (moins de 3 jours)
+    """
+    parsed_date = parse_date(date_value)
+    
+    if parsed_date == datetime.min:
+        return False
+    
+    days_ago = (datetime.now() - parsed_date).days
+    return days_ago <= 3
+
+
+def calculate_match_score(candidate, job):
+    """
+    Calcule le score de matching entre un candidat et une offre (0-100)
+    Utilise l'IA pour comparer les compétences
+    
+    TODO: Implémenter avec OpenAI ou un modèle ML
+    """
+    # Version simple basée sur les compétences
+    candidate_skills = set([s.lower() for s in candidate.skills])
+    job_skills = set([s.lower() for s in job.required_skills])
+    
+    if not job_skills:
+        return 50  # Score par défaut si pas de compétences définies
+    
+    # Intersection des compétences
+    matching_skills = candidate_skills.intersection(job_skills)
+    
+    # Calcul du score
+    score = int((len(matching_skills) / len(job_skills)) * 100)
+    
+    # Bonus pour l'expérience
+    if candidate.experience_years >= job.experience_required:
+        score = min(100, score + 10)
+    
+    # Bonus pour la localisation
+    if candidate.location.lower() in job.location.lower():
+        score = min(100, score + 5)
+    
+    return score
+
+
+def analyze_application_with_ai(candidate, job):
+    """
+    Analyse une candidature avec l'IA et retourne des insights
+    
+    TODO: Implémenter avec OpenAI GPT
+    """
+    analysis = {
+        'strengths': [],
+        'weaknesses': [],
+        'recommendations': ''
+    }
+    
+    # Exemple simple - À remplacer par un vrai appel API
+    candidate_skills = set([s.lower() for s in candidate.skills])
+    job_skills = set([s.lower() for s in job.required_skills])
+    
+    matching_skills = candidate_skills.intersection(job_skills)
+    missing_skills = job_skills - candidate_skills
+    
+    analysis['strengths'] = [
+        f"Maîtrise de {skill}" for skill in list(matching_skills)[:3]
+    ]
+    
+    analysis['weaknesses'] = [
+        f"Compétence manquante: {skill}" for skill in list(missing_skills)[:3]
+    ]
+    
+    if missing_skills:
+        analysis['recommendations'] = f"Nous recommandons de suivre une formation en {', '.join(list(missing_skills)[:2])}"
+    else:
+        analysis['recommendations'] = "Profil excellent pour ce poste !"
+    
+    return analysis
+
+
+def get_similar_jobs(job, limit=5):
+    """
+    Trouve des offres similaires basées sur les compétences et le secteur
+    
+    TODO: Améliorer avec un algorithme de recommandation plus sophistiqué
+    """
+    # Décommentez si vous avez le model
+    """
+    similar = InternalJob.objects.filter(
+        status='published',
+        industry=job.industry
+    ).exclude(id=job.id)[:limit]
+    
+    return similar
+    """
+    return []
+
+
+# ==================== VUES POUR RECRUTEURS ====================
+
+@login_required
+def create_job(request):
+    """
+    Publier une nouvelle offre (recruteurs uniquement)
+    """
+    if request.user.role != 'recruiter':
+        messages.error(request, "Seuls les recruteurs peuvent publier des offres.")
+        return redirect('all_jobs')
+    
+    # TODO: Implémenter le formulaire de création d'offre
+    """
+    if request.method == 'POST':
+        form = JobCreationForm(request.POST)
+        if form.is_valid():
+            job = form.save(commit=False)
+            job.company = request.user.recruiter.company
+            job.recruiter = request.user.recruiter
+            job.status = 'published'
+            job.published_at = datetime.now()
+            job.save()
+            
+            messages.success(request, "Offre publiée avec succès !")
+            return redirect('recruiter_dashboard')
+    else:
+        form = JobCreationForm()
+    
+    return render(request, 'jobs/create_job.html', {'form': form})
+    """
+    pass
+
+
+@login_required
+def manage_applications(request, job_id):
+    """
+    Gérer les candidatures pour une offre (recruteurs uniquement)
+    """
+    if request.user.role != 'recruiter':
+        messages.error(request, "Accès refusé.")
+        return redirect('all_jobs')
+    
+    # TODO: Implémenter la gestion des candidatures
+    """
+    job = get_object_or_404(InternalJob, id=job_id, company=request.user.recruiter.company)
+    applications = Application.objects.filter(job=job).select_related('candidate').order_by('-ai_match_score')
+    
+    context = {
+        'job': job,
+        'applications': applications,
+    }
+    
+    return render(request, 'jobs/manage_applications.html', context)
+    """
+    pass

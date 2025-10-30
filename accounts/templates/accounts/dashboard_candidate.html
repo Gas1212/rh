@@ -1,0 +1,512 @@
+{% extends "accounts/account.html" %}
+
+{% block title %}Dashboard Candidat{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- En-tête avec salutation -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">
+                        Bonjour, {{ candidate.first_name }} 👋
+                    </h1>
+                    <p class="mt-1 text-sm text-gray-600">
+                        {% now "l d F Y" %} • Voici un aperçu de votre activité
+                    </p>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    <a href="{% url 'candidate_profile' %}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-lg transform hover:scale-105">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Modifier mon profil
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cartes statistiques -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Complétion du profil -->
+            <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">75%</span>
+                </div>
+                <h3 class="text-sm font-medium text-gray-600">Profil complété</h3>
+                <div class="mt-3 w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full" style="width: 75%"></div>
+                </div>
+            </div>
+
+            <!-- Candidatures -->
+            <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">12</span>
+                </div>
+                <h3 class="text-sm font-medium text-gray-600">Candidatures</h3>
+                <p class="mt-1 text-xs text-green-600 font-medium">+3 cette semaine</p>
+            </div>
+
+            <!-- Offres recommandées -->
+            <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">8</span>
+                </div>
+                <h3 class="text-sm font-medium text-gray-600">Offres pour vous</h3>
+                <p class="mt-1 text-xs text-purple-600 font-medium">Basé sur votre profil</p>
+            </div>
+
+            <!-- Vues du profil -->
+            <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">156</span>
+                </div>
+                <h3 class="text-sm font-medium text-gray-600">Vues du profil</h3>
+                <p class="mt-1 text-xs text-orange-600 font-medium">+24 ce mois-ci</p>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            
+            <!-- Colonne principale -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Offres recommandées -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                    <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">Offres recommandées pour vous</h2>
+                                    <p class="text-xs text-gray-600">Basées sur votre profil et vos compétences</p>
+                                </div>
+                            </div>
+                            <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Voir tout →</a>
+                        </div>
+                    </div>
+
+                    <div class="divide-y divide-gray-100">
+                        <!-- Offre 1 -->
+                        <div class="p-6 hover:bg-gray-50 transition cursor-pointer group">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-start space-x-4 flex-1">
+                                    <div class="h-12 w-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-white font-bold text-lg">T</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition">
+                                            Développeur Full Stack
+                                        </h3>
+                                        <p class="text-sm text-gray-600 mt-1">Tech Solutions • Tunis, Tunisie</p>
+                                        <div class="flex flex-wrap gap-2 mt-3">
+                                            <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">React</span>
+                                            <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">Django</span>
+                                            <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">Python</span>
+                                        </div>
+                                        <div class="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                                            <span class="flex items-center">
+                                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                                                </svg>
+                                                2500-3500 TND
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                CDI
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end space-y-2 ml-4">
+                                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                                        95% Match
+                                    </span>
+                                    <span class="text-xs text-gray-500">Il y a 2h</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Offre 2 -->
+                        <div class="p-6 hover:bg-gray-50 transition cursor-pointer group">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-start space-x-4 flex-1">
+                                    <div class="h-12 w-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-white font-bold text-lg">D</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition">
+                                            Designer UI/UX Senior
+                                        </h3>
+                                        <p class="text-sm text-gray-600 mt-1">Digital Agency • Remote</p>
+                                        <div class="flex flex-wrap gap-2 mt-3">
+                                            <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">Figma</span>
+                                            <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">Adobe XD</span>
+                                            <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">UI Design</span>
+                                        </div>
+                                        <div class="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                                            <span class="flex items-center">
+                                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                                                </svg>
+                                                3000-4000 TND
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                Télétravail
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end space-y-2 ml-4">
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                                        88% Match
+                                    </span>
+                                    <span class="text-xs text-gray-500">Il y a 5h</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Offre 3 -->
+                        <div class="p-6 hover:bg-gray-50 transition cursor-pointer group">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-start space-x-4 flex-1">
+                                    <div class="h-12 w-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-white font-bold text-lg">M</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition">
+                                            Chef de Projet Digital
+                                        </h3>
+                                        <p class="text-sm text-gray-600 mt-1">Marketing Pro • Sousse, Tunisie</p>
+                                        <div class="flex flex-wrap gap-2 mt-3">
+                                            <span class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Agile</span>
+                                            <span class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Scrum</span>
+                                            <span class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Management</span>
+                                        </div>
+                                        <div class="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                                            <span class="flex items-center">
+                                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                                                </svg>
+                                                2800-3800 TND
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                CDI
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end space-y-2 ml-4">
+                                    <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">
+                                        82% Match
+                                    </span>
+                                    <span class="text-xs text-gray-500">Il y a 1j</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 border-t border-gray-100">
+                        <a href="#" class="block text-center text-sm text-blue-600 hover:text-blue-700 font-medium">
+                            Voir toutes les offres recommandées →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Mes candidatures récentes -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">Mes candidatures récentes</h2>
+                                    <p class="text-xs text-gray-600">Suivez l'état de vos candidatures</p>
+                                </div>
+                            </div>
+                            <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Voir tout →</a>
+                        </div>
+                    </div>
+
+                    <div class="divide-y divide-gray-100">
+                        <!-- Candidature 1 -->
+                        <div class="p-6 hover:bg-gray-50 transition">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <span class="text-blue-600 font-bold">G</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Développeur Backend</h3>
+                                        <p class="text-sm text-gray-600">GlobalTech</p>
+                                        <p class="text-xs text-gray-500 mt-1">Candidaté il y a 2 jours</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                        <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                        </svg>
+                                        En attente
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Candidature 2 -->
+                        <div class="p-6 hover:bg-gray-50 transition">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <span class="text-green-600 font-bold">I</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Data Analyst</h3>
+                                        <p class="text-sm text-gray-600">InnoData</p>
+                                        <p class="text-xs text-gray-500 mt-1">Candidaté il y a 5 jours</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                        <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Présélectionné
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Candidature 3 -->
+                        <div class="p-6 hover:bg-gray-50 transition">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                        <span class="text-purple-600 font-bold">S</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Frontend Developer</h3>
+                                        <p class="text-sm text-gray-600">StartupLab</p>
+                                        <p class="text-xs text-gray-500 mt-1">Candidaté il y a 1 semaine</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
+                                        <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Refusé
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar droite -->
+            <div class="space-y-6">
+                
+                <!-- Progression du profil -->
+                <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg">Complétez votre profil</h3>
+                        <span class="text-2xl font-bold">75%</span>
+                    </div>
+                    <div class="w-full bg-white bg-opacity-20 rounded-full h-3 mb-4">
+                        <div class="bg-white h-3 rounded-full" style="width: 75%"></div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <svg class="h-5 w-5 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-sm">CV uploadé</span>
+                        </div>
+                        <div class="flex items-start opacity-60">
+                            <svg class="h-5 w-5 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-sm">Ajoutez vos compétences</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'candidate_profile' %}" class="mt-4 block w-full bg-white text-blue-600 text-center py-2 rounded-lg font-semibold hover:bg-opacity-90 transition">
+                        Compléter mon profil
+                    </a>
+                </div>
+
+                <!-- Conseils IA -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="h-10 w-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-900">Conseils IA 🤖</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-purple-50 border-l-4 border-purple-500 p-3 rounded">
+                            <p class="text-sm text-gray-700">
+                                <span class="font-semibold">Améliorez votre visibilité:</span> Ajoutez au moins 5 compétences pour augmenter vos chances de matching de 40%
+                            </p>
+                        </div>
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+                            <p class="text-sm text-gray-700">
+                                <span class="font-semibold">Nouvelle offre:</span> 3 postes correspondent à votre profil cette semaine
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activité récente -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+                        <svg class="h-5 w-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Activité récente
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="h-4 w-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-900">Un recruteur a vu votre profil</p>
+                                <p class="text-xs text-gray-500">Il y a 2 heures</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-900">Candidature envoyée</p>
+                                <p class="text-xs text-gray-500">Il y a 5 heures</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="h-4 w-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-900">8 nouvelles offres pour vous</p>
+                                <p class="text-xs text-gray-500">Hier</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions rapides -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-bold text-gray-900 mb-4">Actions rapides</h3>
+                    <div class="space-y-2">
+                        <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition group">
+                            <div class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">Rechercher des offres</span>
+                        </a>
+                        <a href="{% url 'candidate_profile' %}" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition group">
+                            <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700 group-hover:text-green-600 transition">Modifier mon profil</span>
+                        </a>
+                        <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition group">
+                            <div class="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                                <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700 group-hover:text-purple-600 transition">Mes candidatures</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .max-w-7xl > * {
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    .grid > div:nth-child(1) { animation-delay: 0.1s; }
+    .grid > div:nth-child(2) { animation-delay: 0.2s; }
+    .grid > div:nth-child(3) { animation-delay: 0.3s; }
+    .grid > div:nth-child(4) { animation-delay: 0.4s; }
+</style>
+{% endblock %} 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-sm">Photo de profil ajoutée</span>
+                        </div>
+                        <div class="flex items-start">
+                            <svg class="h-5 w-5 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10

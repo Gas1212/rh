@@ -1,0 +1,452 @@
+<!-- fiche_de_paie/templates/fiche_de_paie/formulaire_auto.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Génération Automatique Fiche de Paie</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .auto-field {
+            background-color: #f8f9fa;
+            border-left: 4px solid #28a745;
+            transition: all 0.3s ease;
+        }
+        .suggestion-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .calcul-auto {
+            background-color: #d4edda;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            color: #155724;
+        }
+        .card-header h5 {
+            margin: 0;
+        }
+        .form-check-label {
+            font-weight: bold;
+        }
+        .total-brut-display {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white text-center">
+                <h2 class="mb-0">🧮 Générateur Automatique de Fiche de Paie</h2>
+                <p class="mb-0 mt-2">Système intelligent de calcul selon la réglementation tunisienne 2025</p>
+            </div>
+            
+            <div class="card-body p-4">
+                {% if erreurs %}
+                <div class="alert alert-danger">
+                    <strong>Erreurs de validation :</strong>
+                    <ul class="mb-0">
+                        {% for champ, errors in erreurs.items %}
+                            {% for error in errors %}
+                                <li>{{ field }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="alert alert-info">
+                    <strong>💡 Fonctionnalité automatique :</strong>
+                    Saisissez le salaire de base pour calculer automatiquement les primes et indemnités selon les règles configurées.
+                </div>
+
+                <form method="POST" id="paieForm">
+                    {% csrf_token %}
+                    
+                    <!-- Section informations de base -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h5>📋 Informations employé et entreprise</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold required">Nom & Prénom</label>
+                                        <input type="text" name="nom_prenom" class="form-control"
+                                               value="{{ form.nom_prenom.value|default:'' }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Matricule</label>
+                                        <input type="text" name="matricule" class="form-control"
+                                               value="{{ form.matricule.value|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Emploi</label>
+                                        <input type="text" name="emploi" class="form-control"
+                                               value="{{ form.emploi.value|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">CIN</label>
+                                        <input type="text" name="cin" class="form-control"
+                                               value="{{ form.cin.value|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">N° CNSS</label>
+                                        <input type="text" name="cnss" class="form-control"
+                                               value="{{ form.cnss.value|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Société</label>
+                                        <input type="text" name="societe" class="form-control"
+                                               value="{{ form.societe.value|default:'SOCIETE DIAMOND' }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Année</label>
+                                        <input type="number" name="annee" class="form-control"
+                                               value="{{ form.annee.value|default:2025 }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Mois</label>
+                                        <select name="mois" class="form-select" required>
+                                            <option value="">Sélectionnez un mois</option>
+                                            <option value="Janvier" {% if form.mois.value == "Janvier" %}selected{% endif %}>Janvier</option>
+                                            <option value="Février" {% if form.mois.value == "Février" %}selected{% endif %}>Février</option>
+                                            <option value="Mars" {% if form.mois.value == "Mars" %}selected{% endif %}>Mars</option>
+                                            <option value="Avril" {% if form.mois.value == "Avril" %}selected{% endif %}>Avril</option>
+                                            <option value="Mai" {% if form.mois.value == "Mai" %}selected{% endif %}>Mai</option>
+                                            <option value="Juin" {% if form.mois.value == "Juin" %}selected{% endif %}>Juin</option>
+                                            <option value="Juillet" {% if form.mois.value == "Juillet" %}selected{% endif %}>Juillet</option>
+                                            <option value="Août" {% if form.mois.value == "Août" %}selected{% endif %}>Août</option>
+                                            <option value="Septembre" {% if form.mois.value == "Septembre" %}selected{% endif %}>Septembre</option>
+                                            <option value="Octobre" {% if form.mois.value == "Octobre" %}selected{% endif %}>Octobre</option>
+                                            <option value="Novembre" {% if form.mois.value == "Novembre" %}selected{% endif %}>Novembre</option>
+                                            <option value="Décembre" {% if form.mois.value == "Décembre" %}selected{% endif %}>Décembre</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dans la section situation familiale -->
+                                          <div class="card mb-4">
+                                            <div class="card-header bg-info text-white">
+                                              <h5>👨‍👩‍👧‍👦 Situation familiale (pour calcul IRPP)</h5>
+                                            </div>
+                                            <div class="card-body">
+                                              <div class="row">
+                                                <div class="col-md-6">
+                                                  <div class="form-check mt-3">
+                                                    <input type="checkbox" name="chef_famille" class="form-check-input" id="chef_famille" 
+                                                    value="true" {% if form.chef_famille.value %}checked{% endif %}>
+                                                    <label class="form-check-label fw-bold" for="chef_famille">
+                                                      🏠 Chef de famille
+                                                      </label>
+                                                      <div class="form-text">Déduction de 300 TND/an si applicable</div>
+                                                    </div>
+                                                    </div>
+                                                      <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                          <label class="form-label fw-bold">👶 Nombre d'enfants à charge :</label>
+                                                          <input type="number" name="enfants" min="0" max="10" class="form-control" 
+                                                          value="{{ form.enfants.value|default:0 }}">
+                                                          <div class="form-text">Déductions : 100 TND (1-2 enfants), 1000 TND (3ème), 2000 TND (4ème+)</div>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                    </div>
+
+                    <!-- Section calcul automatique -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5>💰 Calcul automatique des gains</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold required">Salaire de base (TND)</label>
+                                        <input type="number" step="0.001" name="salaire_base"
+                                               class="form-control" required
+                                               value="{{ form.salaire_base.value|default:'' }}"
+                                               onchange="calculerAuto()" onkeyup="calculerAuto()">
+                                        <div class="form-text">Ce champ déclenche le calcul automatique</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Années d'ancienneté</label>
+                                        <input type="number" name="annees_anciennete" min="0" max="50"
+                                               class="form-control" value="{{ form.annees_anciennete.value|default:0 }}"
+                                               onchange="calculerAuto()" onkeyup="calculerAuto()">
+                                        <div class="form-text">Pour la prime d'ancienneté</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section des primes automatiques -->
+                            <div id="champsAuto" class="mt-4">
+                                <h6 class="fw-bold text-success mb-3">Primes calculées automatiquement :</h6>
+                                
+                                <div class="mb-3 auto-field p-3">
+                                    <label class="form-label">Prime de présence</label>
+                                    <input type="number" step="0.001" name="prime_presence"
+                                           value="{{ form.prime_presence.value|default:0 }}"
+                                           class="form-control" readonly>
+                                    <small class="calcul-auto">Calculé automatiquement (5% du salaire de base si ≥ 1000 TND)</small>
+                                </div>
+
+                                <div class="mb-3 auto-field p-3">
+                                    <label class="form-label">Indemnité de transport</label>
+                                    <input type="number" step="0.001" name="indemn_transport"
+                                           value="{{ form.indemn_transport.value|default:0 }}"
+                                           class="form-control" readonly>
+                                    <small class="calcul-auto">Calculé automatiquement (3% du salaire de base)</small>
+                                </div>
+
+                                <div class="mb-3 auto-field p-3">
+                                    <label class="form-label">Prime panier</label>
+                                    <input type="number" step="0.001" name="prime_panier"
+                                           value="{{ form.prime_panier.value|default:0 }}"
+                                           class="form-control" readonly>
+                                    <small class="calcul-auto">Calculé automatiquement (2% du salaire de base)</small>
+                                </div>
+
+                                <div class="mb-3 auto-field p-3" id="primeRendementField" style="display: none;">
+                                    <label class="form-label">Prime de rendement</label>
+                                    <input type="number" step="0.001" name="prime_rendement"
+                                           value="{{ form.prime_rendement.value|default:0 }}"
+                                           class="form-control" readonly>
+                                    <small class="calcul-auto">Calculé automatiquement (4% du salaire de base - si ≥ 2000 TND)</small>
+                                </div>
+
+                                <div class="mb-3 auto-field p-3" id="primeAncienneteField" style="display: none;">
+                                    <label class="form-label">Prime d'ancienneté</label>
+                                    <input type="number" step="0.001" name="prime_anciennete"
+                                           value="{{ form.prime_anciennete.value|default:0 }}"
+                                           class="form-control" readonly>
+                                    <small class="calcul-auto">Calculé selon l'échelle d'ancienneté</small>
+                                </div>
+                            </div>
+
+                            <!-- Affichage du total brut calculé -->
+                            <div class="total-brut-display mt-4">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <label class="form-label fw-bold h5 mb-0">💰 TOTAL BRUT CALCULÉ :</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="number" step="0.001" name="total_brut_calcule" 
+                                               class="form-control fw-bold h5 text-success border-0 bg-transparent text-white text-end" readonly 
+                                               id="totalBrutCalcule" value="0.000">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section champs manuels -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h5>✏️ Saisie manuelle optionnelle</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Heures supplémentaires (TND)</label>
+                                        <input type="number" step="0.001" name="heures_supp"
+                                               class="form-control" value="{{ form.heures_supp.value|default:0 }}"
+                                               onchange="recalculerTotalBrut()" onkeyup="recalculerTotalBrut()">
+                                        <div class="form-text">Montant total des heures supplémentaires</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Avances et acomptes (TND)</label>
+                                        <input type="number" step="0.001" name="avance"
+                                               class="form-control" value="{{ form.avance.value|default:0 }}">
+                                        <div class="form-text">Montant à déduire du net à payer</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success btn-lg px-5 py-3 fw-bold">
+                            🧾 Générer la fiche de paie PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Informations sur les calculs -->
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5>📊 Règles de calcul automatique</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Primes automatiques :</h6>
+                        <ul>
+                            <li><strong>Prime de présence :</strong> 5% du salaire de base (si ≥ 1000 TND)</li>
+                            <li><strong>Indemnité transport :</strong> 3% du salaire de base</li>
+                            <li><strong>Prime panier :</strong> 2% du salaire de base</li>
+                            <li><strong>Prime rendement :</strong> 4% du salaire de base (si ≥ 2000 TND)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Prime d'ancienneté :</h6>
+                        <ul>
+                            <li>0-2 ans : 0%</li>
+                            <li>2-5 ans : 2%</li>
+                            <li>5-10 ans : 5%</li>
+                            <li>10+ ans : 8%</li>
+                        </ul>
+                        <h6 class="mt-3">Déductions IRPP :</h6>
+                        <ul>
+                            <li>Chef de famille : 300 TND/an</li>
+                            <li>Enfants : 100 TND (1-2), 1000 TND (3ème), 2000 TND (4ème+)</li>
+                            <li>Frais professionnels : 10% (max 2000 TND/an)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/paie/generate/?mode=manuel" class="btn btn-outline-primary">
+                📝 Passer au formulaire manuel
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function calculerAuto() {
+            const salaireBase = parseFloat(document.querySelector('[name="salaire_base"]').value) || 0;
+            const anciennete = parseInt(document.querySelector('[name="annees_anciennete"]').value) || 0;
+            
+            // Réinitialiser l'affichage
+            document.getElementById('primeRendementField').style.display = 'none';
+            document.getElementById('primeAncienneteField').style.display = 'none';
+            
+            if (salaireBase > 0) {
+                // Calcul des primes
+                const primePresence = salaireBase >= 1000 ? salaireBase * 0.05 : 0;
+                const indemnTransport = salaireBase * 0.03;
+                const primePanier = salaireBase * 0.02;
+                const primeRendement = salaireBase >= 2000 ? salaireBase * 0.04 : 0;
+                
+                // Prime ancienneté
+                let tauxAnciennete = 0;
+                if (anciennete >= 10) tauxAnciennete = 0.08;
+                else if (anciennete >= 5) tauxAnciennete = 0.05;
+                else if (anciennete >= 2) tauxAnciennete = 0.02;
+                
+                const primeAnciennete = salaireBase * tauxAnciennete;
+                
+                // Mettre à jour les champs
+                document.querySelector('[name="prime_presence"]').value = primePresence.toFixed(3);
+                document.querySelector('[name="indemn_transport"]').value = indemnTransport.toFixed(3);
+                document.querySelector('[name="prime_panier"]').value = primePanier.toFixed(3);
+                
+                // Afficher/masquer les primes conditionnelles
+                if (primeRendement > 0) {
+                    document.querySelector('[name="prime_rendement"]').value = primeRendement.toFixed(3);
+                    document.getElementById('primeRendementField').style.display = 'block';
+                }
+                
+                if (primeAnciennete > 0) {
+                    document.querySelector('[name="prime_anciennete"]').value = primeAnciennete.toFixed(3);
+                    document.getElementById('primeAncienneteField').style.display = 'block';
+                }
+                
+                // Calculer le total brut
+                recalculerTotalBrut();
+            } else {
+                // Réinitialiser si salaire base est vide
+                document.querySelector('[name="prime_presence"]').value = '0.000';
+                document.querySelector('[name="indemn_transport"]').value = '0.000';
+                document.querySelector('[name="prime_panier"]').value = '0.000';
+                document.querySelector('[name="prime_rendement"]').value = '0.000';
+                document.querySelector('[name="prime_anciennete"]').value = '0.000';
+                document.getElementById('totalBrutCalcule').value = '0.000';
+            }
+        }
+
+        function recalculerTotalBrut() {
+            const salaireBase = parseFloat(document.querySelector('[name="salaire_base"]').value) || 0;
+            const primePresence = parseFloat(document.querySelector('[name="prime_presence"]').value) || 0;
+            const indemnTransport = parseFloat(document.querySelector('[name="indemn_transport"]').value) || 0;
+            const primePanier = parseFloat(document.querySelector('[name="prime_panier"]').value) || 0;
+            const primeRendement = parseFloat(document.querySelector('[name="prime_rendement"]').value) || 0;
+            const primeAnciennete = parseFloat(document.querySelector('[name="prime_anciennete"]').value) || 0;
+            const heuresSupp = parseFloat(document.querySelector('[name="heures_supp"]').value) || 0;
+            
+            const totalBrut = salaireBase + primePresence + indemnTransport + primePanier + 
+                            primeRendement + primeAnciennete + heuresSupp;
+            
+            document.getElementById('totalBrutCalcule').value = totalBrut.toFixed(3);
+        }
+
+        // Calcul automatique au chargement si valeurs existent
+        document.addEventListener('DOMContentLoaded', function() {
+            const salaireBase = document.querySelector('[name="salaire_base"]').value;
+            if (salaireBase) {
+                calculerAuto();
+            }
+        });
+
+        // Validation du formulaire
+        document.getElementById('paieForm').addEventListener('submit', function(e) {
+            const salaireBase = document.querySelector('[name="salaire_base"]').value;
+            if (!salaireBase || parseFloat(salaireBase) <= 0) {
+                e.preventDefault();
+                alert('Veuillez saisir un salaire de base valide.');
+                document.querySelector('[name="salaire_base"]').focus();
+            }
+        });
+    </script>
+</body>
+</html>

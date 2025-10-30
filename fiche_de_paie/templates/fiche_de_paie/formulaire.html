@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur de Paie Tunisie - 2025</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card {
+            border: none;
+            border-radius: 15px;
+        }
+        .form-label {
+            color: #2c3e50;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+        .header-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg p-4 p-md-5 rounded-4">
+                <!-- En-tête -->
+                <div class="text-center mb-4">
+                    <div class="header-icon">🧾</div>
+                    <h1 class="text-success fw-bold mb-2">Simulateur de Fiche de Paie</h1>
+                    <p class="text-muted">Calcul conforme à la réglementation tunisienne 2025 - CNSS, IRPP, CSS</p>
+                </div>
+
+                <form method="POST" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Informations personnelles -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold required">Nom :</label>
+                            <input type="text" name="nom" class="form-control" placeholder="Ex : Ben Ali" required>
+                            <div class="invalid-feedback">
+                                Veuillez saisir votre nom.
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold required">Prénom :</label>
+                            <input type="text" name="prenom" class="form-control" placeholder="Ex : Ahmed" required>
+                            <div class="invalid-feedback">
+                                Veuillez saisir votre prénom.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Salaire brut -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold required">Salaire brut mensuel (TND) :</label>
+                        <div class="input-group">
+                            <input type="number" step="0.001" min="0" name="salaire_brut" class="form-control" 
+                                   placeholder="Ex : 2700.000" required>
+                            <span class="input-group-text">TND</span>
+                        </div>
+                        <div class="form-text">
+                            Salaire brut avant déductions sociales et fiscales
+                        </div>
+                        <div class="invalid-feedback">
+                            Veuillez saisir un salaire brut valide.
+                        </div>
+                    </div>
+
+                    <!-- Période -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold required">Mois de paie :</label>
+                        <select name="mois" class="form-select" required>
+                            <option value="">Sélectionnez un mois</option>
+                            <option value="Janvier 2025">Janvier 2025</option>
+                            <option value="Février 2025">Février 2025</option>
+                            <option value="Mars 2025">Mars 2025</option>
+                            <option value="Avril 2025">Avril 2025</option>
+                            <option value="Mai 2025">Mai 2025</option>
+                            <option value="Juin 2025">Juin 2025</option>
+                            <option value="Juillet 2025">Juillet 2025</option>
+                            <option value="Août 2025">Août 2025</option>
+                            <option value="Septembre 2025">Septembre 2025</option>
+                            <option value="Octobre 2025">Octobre 2025</option>
+                            <option value="Novembre 2025">Novembre 2025</option>
+                            <option value="Décembre 2025">Décembre 2025</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Veuillez sélectionner un mois.
+                        </div>
+                    </div>
+
+                    <!-- Situation familiale -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check mt-3">
+                                <input type="checkbox" name="chef_famille" class="form-check-input" id="chef_famille" value="oui">
+                                <label class="form-check-label fw-semibold" for="chef_famille">
+                                    🏠 Chef de famille
+                                </label>
+                            </div>
+                            <div class="form-text text-muted">
+                                Déduction de 300 TND/an si applicable
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">👶 Nombre d'enfants à charge :</label>
+                            <input type="number" name="enfants" min="0" max="10" class="form-control" value="0">
+                            <div class="form-text text-muted">
+                                Déductions : 100 TND (1-2 enfants), 1000 TND (3ème), 2000 TND (4ème+)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations sur les calculs -->
+                    <div class="info-box">
+                        <h6 class="fw-bold text-primary">📊 Informations de calcul :</h6>
+                        <ul class="list-unstyled mb-0 small">
+                            <li>✓ <strong>CNSS salariale :</strong> 9.68% du brut</li>
+                            <li>✓ <strong>IRPP :</strong> Calcul progressif annuel avec déductions</li>
+                            <li>✓ <strong>CSS :</strong> 0.5% de la base imposable</li>
+                            <li>✓ <strong>Frais professionnels :</strong> 10% plafonnés à 2000 TND/an</li>
+                            <li>✓ <strong>Seuil d'imposition :</strong> 5000 TND/an</li>
+                        </ul>
+                    </div>
+
+                    <!-- Bouton de soumission -->
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-success btn-lg px-5 py-3 fw-bold">
+                            🧮 Calculer le salaire net
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Pied de page informatif -->
+            <div class="text-center mt-4">
+                <p class="text-muted small">
+                    Ce simulateur utilise les taux officiels 2025 de la CNSS et le barème IRPP tunisien.<br>
+                    Les résultats sont donnés à titre indicatif.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script pour la validation Bootstrap -->
+<script>
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
+
+</body>
+</html>

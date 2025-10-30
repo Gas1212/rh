@@ -1,0 +1,293 @@
+<!-- fiche_de_paie/templates/fiche_de_paie/formulaire_2.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Génération Fiche de Paie - Formulaire Standard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card {
+            border: none;
+            border-radius: 15px;
+        }
+        .form-label {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+        .header-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-lg p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <div class="header-icon">📋</div>
+                        <h1 class="text-primary mb-2">Génération de Fiche de Paie</h1>
+                        <p class="text-muted">Formulaire standard - Remplissez tous les champs manuellement</p>
+                    </div>
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Erreurs de validation :</strong>
+                        <ul class="mb-0">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ field }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- Informations employé -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0">👤 Informations Employé</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label required">Nom & Prénom</label>
+                                            <input type="text" name="nom_prenom" class="form-control" 
+                                                   value="{{ form.nom_prenom.value|default:'' }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Matricule</label>
+                                            <input type="text" name="matricule" class="form-control" 
+                                                   value="{{ form.matricule.value|default:'' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Emploi</label>
+                                            <input type="text" name="emploi" class="form-control" 
+                                                   value="{{ form.emploi.value|default:'' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">CIN</label>
+                                            <input type="text" name="cin" class="form-control" 
+                                                   value="{{ form.cin.value|default:'' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Informations entreprise -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">🏢 Informations Entreprise</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">N° CNSS</label>
+                                            <input type="text" name="cnss" class="form-control" 
+                                                   value="{{ form.cnss.value|default:'' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Société</label>
+                                            <input type="text" name="societe" class="form-control" 
+                                                   value="{{ form.societe.value|default:'SOCIETE DIAMOND' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Année</label>
+                                            <input type="number" name="annee" class="form-control" 
+                                                   value="{{ form.annee.value|default:2025 }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Mois</label>
+                                            <select name="mois" class="form-select">
+                                                <option value="">Sélectionnez un mois</option>
+                                                <option value="Janvier" {% if form.mois.value == "Janvier" %}selected{% endif %}>Janvier</option>
+                                                <option value="Février" {% if form.mois.value == "Février" %}selected{% endif %}>Février</option>
+                                                <option value="Mars" {% if form.mois.value == "Mars" %}selected{% endif %}>Mars</option>
+                                                <option value="Avril" {% if form.mois.value == "Avril" %}selected{% endif %}>Avril</option>
+                                                <option value="Mai" {% if form.mois.value == "Mai" %}selected{% endif %}>Mai</option>
+                                                <option value="Juin" {% if form.mois.value == "Juin" %}selected{% endif %}>Juin</option>
+                                                <option value="Juillet" {% if form.mois.value == "Juillet" %}selected{% endif %}>Juillet</option>
+                                                <option value="Août" {% if form.mois.value == "Août" %}selected{% endif %}>Août</option>
+                                                <option value="Septembre" {% if form.mois.value == "Septembre" %}selected{% endif %}>Septembre</option>
+                                                <option value="Octobre" {% if form.mois.value == "Octobre" %}selected{% endif %}>Octobre</option>
+                                                <option value="Novembre" {% if form.mois.value == "Novembre" %}selected{% endif %}>Novembre</option>
+                                                <option value="Décembre" {% if form.mois.value == "Décembre" %}selected{% endif %}>Décembre</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gains et salaires -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">💰 Gains et Salaires</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label required">Salaire de base (TND)</label>
+                                            <input type="number" step="0.001" name="salaire_base" 
+                                                   class="form-control" required
+                                                   value="{{ form.salaire_base.value|default:'' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Prime de présence (TND)</label>
+                                            <input type="number" step="0.001" name="prime_presence" 
+                                                   class="form-control" 
+                                                   value="{{ form.prime_presence.value|default:0 }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Indemnité transport (TND)</label>
+                                            <input type="number" step="0.001" name="indemn_transport" 
+                                                   class="form-control" 
+                                                   value="{{ form.indemn_transport.value|default:0 }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Prime panier (TND)</label>
+                                            <input type="number" step="0.001" name="prime_panier" 
+                                                   class="form-control" 
+                                                   value="{{ form.prime_panier.value|default:0 }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Prime rendement (TND)</label>
+                                            <input type="number" step="0.001" name="prime_rendement" 
+                                                   class="form-control" 
+                                                   value="{{ form.prime_rendement.value|default:0 }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Heures supplémentaires (TND)</label>
+                                            <input type="number" step="0.001" name="heures_supp" 
+                                                   class="form-control" 
+                                                   value="{{ form.heures_supp.value|default:0 }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dans la section situation familiale -->
+                                              <div class="card mb-4">
+                                                <div class="card-header bg-warning text-dark">
+                                                  <h5 class="mb-0">👨‍👩‍👧‍👦 Situation Familiale</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                  <div class="row">
+                                                    <div class="col-md-6">
+                                                      <div class="form-check mb-3">
+                                                        <input type="checkbox" name="chef_famille" class="form-check-input" 
+                                                        id="chef_famille" {% if form.chef_famille.value %}checked{% endif %}>
+                                                        <label class="form-check-label" for="chef_famille">
+                                                          Chef de famille
+                                                        </label>
+                                                      </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                      <div class="mb-3">
+                                                        <label class="form-label">Nombre d'enfants à charge</label>
+                                                        <input type="number" name="enfants" min="0" class="form-control" 
+                                                        value="{{ form.enfants.value|default:0 }}">
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+
+                        <!-- Avances et déductions -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0">💸 Avances et Déductions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Avances et acomptes (TND)</label>
+                                            <input type="number" step="0.001" name="avance" 
+                                                   class="form-control" 
+                                                   value="{{ form.avance.value|default:0 }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Années d'ancienneté</label>
+                                            <input type="number" name="annees_anciennete" min="0" 
+                                                   class="form-control" 
+                                                   value="{{ form.annees_anciennete.value|default:0 }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
+                                🧾 Générer la Fiche de Paie PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/paie/generate/" class="btn btn-outline-secondary">
+                        🔄 Revenir au formulaire automatique
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

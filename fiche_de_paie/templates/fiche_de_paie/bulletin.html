@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Bulletin de Paie - Tunisie</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+            line-height: 1.4;
+        }
+        h2, h3 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #34495e;
+            background-color: #ecf0f1;
+            padding: 8px;
+            margin-top: 20px;
+        }
+        p {
+            margin: 5px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 6px 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #34495e;
+            color: white;
+            font-weight: bold;
+        }
+        .right {
+            text-align: right;
+        }
+        .center {
+            text-align: center;
+        }
+        .total {
+            font-weight: bold;
+            background-color: #ecf0f1;
+        }
+        .subtotal {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .negative {
+            color: #e74c3c;
+        }
+        .positive {
+            color: #27ae60;
+        }
+        .section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+        .signature {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature div {
+            text-align: center;
+            width: 45%;
+            border-top: 1px solid #34495e;
+            padding-top: 5px;
+        }
+        @media print {
+            body {
+                margin: 10px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- En-tête -->
+    <div class="section">
+        <h2>{{ data.societe|default:"SOCIETE DIAMOND" }}</h2>
+        <p class="center">
+            <strong>Bulletin de Paie - {{ data.mois|default:"-" }} {{ data.annee|default:"-" }}</strong><br>
+            CNSS : {{ data.cnss|default:"-" }}
+        </p>
+    </div>
+
+    <!-- Informations employé -->
+    <div class="section">
+        <table>
+            <tr>
+                <th colspan="4">INFORMATIONS EMPLOYÉ</th>
+            </tr>
+            <tr>
+                <td><strong>Nom & Prénom :</strong></td>
+                <td>{{ data.nom_prenom|default:"-" }}</td>
+                <td><strong>Matricule :</strong></td>
+                <td>{{ data.matricule|default:"-" }}</td>
+            </tr>
+            <tr>
+                <td><strong>Emploi :</strong></td>
+                <td>{{ data.emploi|default:"-" }}</td>
+                <td><strong>CIN :</strong></td>
+                <td>{{ data.cin|default:"-" }}</td>
+            </tr>
+            <tr>
+                <td><strong>Statut familial :</strong></td>
+                <td colspan="3">
+                    {% if data.chef_famille %}Chef de famille{% else %}Célibataire{% endif %}
+                    {% if data.enfants > 0 %} - {{ data.enfants }} enfant(s){% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Gains et Primes -->
+    <div class="section">
+        <h3>GAINS ET PRIMES</h3>
+        <table>
+            <tr>
+                <th>Désignation</th>
+                <th class="right">Montant (TND)</th>
+            </tr>
+            <tr>
+                <td>Salaire de base</td>
+                <td class="right">{{ data.salaire_base|floatformat:3 }}</td>
+            </tr>
+            {% if data.prime_presence > 0 %}
+            <tr>
+                <td>Prime de présence</td>
+                <td class="right">{{ data.prime_presence|floatformat:3 }}</td>
+            </tr>
+            {% endif %}
+            {% if data.indemn_transport > 0 %}
+            <tr>
+                <td>Indemnité de transport</td>
+                <td class="right">{{ data.indemn_transport|floatformat:3 }}</td>
+            </tr>
+            {% endif %}
+            {% if data.prime_panier > 0 %}
+            <tr>
+                <td>Prime panier</td>
+                <td class="right">{{ data.prime_panier|floatformat:3 }}</td>
+            </tr>
+            {% endif %}
+            {% if data.prime_rendement > 0 %}
+            <tr>
+                <td>Prime de rendement</td>
+                <td class="right">{{ data.prime_rendement|floatformat:3 }}</td>
+            </tr>
+            {% endif %}
+            {% if data.prime_anciennete > 0 %}
+            <tr>
+                <td>Prime d'ancienneté</td>
+                <td class="right">{{ data.prime_anciennete|floatformat:3 }}</td>
+            </tr>
+            {% endif %}
+            {% if data.heures_supp > 0 %}
+            <tr>
+                <td>Heures supplémentaires</td>
+                <td class="right">{{ data.heures_supp|floatformat:3 }}</td>
+            </tr>
+            {% endif %}
+            <tr class="total">
+                <td><strong>TOTAL BRUT</strong></td>
+                <td class="right"><strong>{{ data.total_brut|floatformat:3 }}</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Cotisations Sociales -->
+    <div class="section">
+        <h3>COTISATIONS SOCIALES</h3>
+        <table>
+            <tr>
+                <th>Désignation</th>
+                <th class="right">Part Salariale</th>
+                <th class="right">Part Patronale</th>
+            </tr>
+            <tr>
+                <td>Assurances sociales (5%)</td>
+                <td class="right">{{ data.cotisation_assurances|default:0|floatformat:3 }}</td>
+                <td class="right">{{ data.patronale_assurances|default:0|floatformat:3 }}</td>
+            </tr>
+            <tr>
+                <td>Cotisation supplémentaire maladie (1.43%)</td>
+                <td class="right">{{ data.cotisation_supp|default:0|floatformat:3 }}</td>
+                <td class="right">{{ data.patronale_supp|default:0|floatformat:3 }}</td>
+            </tr>
+            <tr>
+                <td>Régime de pensions (2.75%)</td>
+                <td class="right">{{ data.cotisation_pensions|default:0|floatformat:3 }}</td>
+                <td class="right">{{ data.patronale_pensions|default:0|floatformat:3 }}</td>
+            </tr>
+            <tr>
+                <td>Assurance chômage (0.5%)</td>
+                <td class="right">{{ data.cotisation_chomage|default:0|floatformat:3 }}</td>
+                <td class="right">{{ data.patronale_chomage|default:0|floatformat:3 }}</td>
+            </tr>
+            <tr>
+                <td>Majoration loi 74-101 (0.5%)</td>
+                <td class="right">-</td>
+                <td class="right">{{ data.patronale_majoration_loi_74_101|default:0|floatformat:3 }}</td>
+            </tr>
+            <tr class="total">
+                <td><strong>TOTAL COTISATIONS</strong></td>
+                <td class="right negative"><strong>{{ data.retenue_cnss|default:0|floatformat:3 }}</strong></td>
+                <td class="right"><strong>{{ data.total_cotisations_patronales|default:0|floatformat:3 }}</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Impôts et Contributions -->
+    <div class="section">
+        <h3>IMPÔTS ET CONTRIBUTIONS</h3>
+        <table>
+            <tr>
+                <th>Désignation</th>
+                <th class="right">Base / Montant</th>
+            </tr>
+            <tr>
+                <td>Salaire brut imposable</td>
+                <td class="right">{{ data.brut_imposable|default:0|floatformat:3 }}</td>
+            </tr>
+            {% if data.ded_situation > 0 %}
+            <tr>
+                <td>Déduction situation familiale</td>
+                <td class="right negative">-{{ data.ded_situation|floatformat:3 }}</td>
+            </tr>
+            {% endif %}
+            {% if data.frais_prof > 0 %}
+            <tr>
+                <td>Frais professionnels (10%)</td>
+                <td class="right negative">-{{ data.frais_prof|floatformat:3 }}</td>
+            </tr>
+            {% endif %}
+            <tr class="subtotal">
+                <td><strong>Base imposable nette</strong></td>
+                <td class="right"><strong>{{ data.base_imposable_nette|default:0|floatformat:3 }}</strong></td>
+            </tr>
+            <tr>
+                <td>IRPP (Impôt sur le revenu)</td>
+                <td class="right negative">{{ data.irpp|default:0|floatformat:3 }}</td>
+            </tr>
+            <tr>
+                <td>CSS (Contribution sociale solidaire - 0.5%)</td>
+                <td class="right negative">{{ data.css|default:0|floatformat:3 }}</td>
+            </tr>
+            <tr class="total">
+                <td><strong>TOTAL IMPÔTS</strong></td>
+                <td class="right negative"><strong>{{ data.total_impots|default:0|floatformat:3 }}</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Récapitulatif -->
+    <div class="section">
+        <h3>RÉCAPITULATIF</h3>
+        <table>
+            <tr class="subtotal">
+                <td>Salaire brut total</td>
+                <td class="right">{{ data.total_brut|default:0|floatformat:3 }}</td>
+            </tr>
+            <tr>
+                <td>Cotisations sociales salariales</td>
+                <td class="right negative">-{{ data.retenue_cnss|default:0|floatformat:3 }}</td>
+            </tr>
+            <tr>
+                <td>IRPP</td>
+                <td class="right negative">-{{ data.irpp|default:0|floatformat:3 }}</td>
+            </tr>
+            <tr>
+                <td>CSS</td>
+                <td class="right negative">-{{ data.css|default:0|floatformat:3 }}</td>
+            </tr>
+            {% if data.avance > 0 %}
+            <tr>
+                <td>Avances et acomptes</td>
+                <td class="right negative">-{{ data.avance|floatformat:3 }}</td>
+            </tr>
+            {% endif %}
+            {% if data.autres_deductions > 0 %}
+            <tr>
+                <td>Autres déductions</td>
+                <td class="right negative">-{{ data.autres_deductions|floatformat:3 }}</td>
+            </tr>
+            {% endif %}
+            <tr class="total">
+                <td><strong>NET À PAYER</strong></td>
+                <td class="right positive"><strong>{{ data.net_a_payer|default:0|floatformat:3 }}</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Signature -->
+    <div class="signature">
+        <div>
+            <p>Le responsable</p>
+            <p>Signature et cachet</p>
+        </div>
+        <div>
+            <p>L'employé</p>
+            <p>Signature</p>
+        </div>
+    </div>
+
+    <!-- Pied de page -->
+    <div style="text-align: center; margin-top: 30px; font-size: 10px; color: #7f8c8d;">
+        <p>Bulletin établi le {{ data.date_generation|default:"-" }} - Conforme à la législation tunisienne 2025</p>
+    </div>
+
+</body>
+</html>
