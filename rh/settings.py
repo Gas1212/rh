@@ -105,7 +105,7 @@ db2 = connect(db='Tanitjob', alias='tanit', host=MONGODB_DATABASES['tanit']['hos
 db_rh = connect(db='RH_Platform', alias='default', host=MONGODB_DATABASES['default']['host'], username='syncro1578_db_user', password='ah49wIw2HpxEnKwg')
 
 # ==================== CUSTOM USER MODEL ====================
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # ==================== MEDIA ====================
 MEDIA_URL = '/media/'
